@@ -8,7 +8,7 @@ param (
   [ValidateNotNull()]
   [ValidateLength(1, [int]::MaxValue)]
   [string]
-  $dir
+  $dist
 )
 
 Function Step-Log($message) {
@@ -287,4 +287,5 @@ if($version -eq "master") {
   Set-PhpIniKey -Key 'opcache.jit' -Value '1235' -Path $php_dir
 }
 Update-PhpCAInfo -Path $php_dir -Source CurrentUser
+Move-Item -path $dist\..\src\configs\*.json -Destination $env:RUNNER_TOOL_CACHE
 Add-Log $tick "PHP" "$status PHP $($installed.FullVersion)"

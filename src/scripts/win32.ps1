@@ -235,7 +235,7 @@ Function Add-Tool() {
   if($url.Count -gt 1) { $url = $url[0] }
   if ($tool -eq "symfony") {
     Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $bin_dir\$tool.exe
-    Add-ToProfile $current_profile $tool "New-Alias $tool $bin_dir\$tool.exe" >$null 2>&1
+    Add-ToProfile $current_profile $tool "New-Alias $tool $bin_dir\$tool.exe" 
   } else {
     try {
       Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $bin_dir\$tool
@@ -245,14 +245,14 @@ Function Add-Tool() {
       $bat_content += "SET BIN_TARGET=%~dp0/" + $tool
       $bat_content += "php %BIN_TARGET% %*"
       Set-Content -Path $bin_dir\$tool.bat -Value $bat_content
-      Add-ToProfile $current_profile $tool "New-Alias $tool $bin_dir\$tool.bat" >$null 2>&1
+      Add-ToProfile $current_profile $tool "New-Alias $tool $bin_dir\$tool.bat" 
     } catch { }
   }
   if($tool -eq "phan") {
-    Add-Extension fileinfo >$null 2>&1
-    Add-Extension ast >$null 2>&1
+    Add-Extension fileinfo 
+    Add-Extension ast 
   } elseif($tool -eq "phive") {
-    Add-Extension xml >$null 2>&1
+    Add-Extension xml 
   } elseif($tool -eq "cs2pr") {
     (Get-Content $bin_dir/cs2pr).replace('exit(9)', 'exit(0)') | Set-Content $bin_dir/cs2pr
   } elseif($tool -eq "composer") {
@@ -327,7 +327,7 @@ if($env:RUNNER -eq 'self-hosted') {
   $php_dir = "$php_dir$version"
   $ext_dir = "$php_dir\ext"
   $cert_source='Curl'
-  Get-CleanPSProfile >$null 2>&1
+  Get-CleanPSProfile 
   New-Item $bin_dir -Type Directory 2>&1 | Out-Null
   Add-Path -PathItem $bin_dir
   if($version -lt 5.6) {
@@ -340,17 +340,17 @@ if($env:RUNNER -eq 'self-hosted') {
   }
   New-Item $php_dir -Type Directory 2>&1 | Out-Null
   Add-Path -PathItem $php_dir
-  setx PHPROOT $php_dir >$null 2>&1
+  setx PHPROOT $php_dir 
 } else {
   $current_profile = "$PSHOME\Profile.ps1"
   if(-not(Test-Path -LiteralPath $current_profile)) {
-    New-Item -Path $current_profile -ItemType "file" -Force >$null 2>&1
+    New-Item -Path $current_profile -ItemType "file" -Force 
   }
 }
 
-Add-Printf >$null 2>&1
+Add-Printf 
 Step-Log "Setup PhpManager"
-Install-PhpManager >$null 2>&1
+Install-PhpManager 
 Add-Log $tick "PhpManager" "Installed"
 
 Step-Log "Setup PHP"
@@ -371,7 +371,7 @@ if ($null -eq $installed -or -not("$($installed.Version).".StartsWith(($version 
   Install-Php -Version $version -Architecture $arch -ThreadSafe $ts -InstallVC -Path $php_dir -TimeZone UTC -InitialPhpIni Production -Force > $null 2>&1
 } else {
   if($env:update -eq 'true') {
-    Update-Php $php_dir >$null 2>&1
+    Update-Php $php_dir 
     $status = "Updated to"
   } else {
     $status = "Found"
@@ -383,7 +383,7 @@ Set-PhpIniKey -Key 'date.timezone' -Value 'UTC' -Path $php_dir
 Set-PhpIniKey -Key 'memory_limit' -Value '-1' -Path $php_dir
 if($version -lt "5.5") {
   ForEach($lib in "libeay32.dll", "ssleay32.dll") {
-    Invoke-WebRequest -UseBasicParsing -Uri https://dl.bintray.com/shivammathur/php/$lib -OutFile $php_dir\$lib >$null 2>&1
+    Invoke-WebRequest -UseBasicParsing -Uri https://dl.bintray.com/shivammathur/php/$lib -OutFile $php_dir\$lib 
   }
   Enable-PhpExtension -Extension openssl, curl, mbstring -Path $php_dir
 } else {

@@ -1773,6 +1773,7 @@ const utils = __importStar(__webpack_require__(163));
  */
 async function getToolVersion(version) {
     // semver_regex - https://semver.org/
+    console.log(`Raw version: ${version}`);
     const semver_regex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
     const composer_regex = /^stable$|^preview$|^snapshot$|^v?[1|2]$/;
     version = version.replace(/[><=^]*/, '');
@@ -1793,6 +1794,7 @@ exports.getToolVersion = getToolVersion;
  * @param release
  */
 async function parseTool(release) {
+    console.log(`Release: ${release}`);
     const parts = release.split(':');
     const tool = parts[0];
     const version = parts[1];
@@ -2022,7 +2024,7 @@ exports.getWpCliUrl = getWpCliUrl;
  */
 async function addComposer(tools_list) {
     const regex_any = /^composer($|:.*)/;
-    const regex_valid = /^composer:?($|preview$|snapshot$|v?[1-2]$)/;
+    const regex_valid = /^composer:?($|preview$|snapshot$|v?[1-2]$|v\d+\.\d+\.\d+[\w-]*$)/;
     const regex_composer1_tools = /hirak|prestissimo|narrowspark|composer-prefetcher/;
     const matches = tools_list.filter(tool => regex_valid.test(tool));
     let composer = 'composer';
@@ -2034,7 +2036,7 @@ async function addComposer(tools_list) {
         case matches[0] == undefined:
             break;
         default:
-            composer = matches[matches.length - 1].replace(/v([1-2])/, '$1');
+            composer = matches[matches.length - 1].replace(/v(\d\S*)/, '$1');
             break;
     }
     tools_list.unshift(composer);
@@ -2137,7 +2139,9 @@ exports.addPackage = addPackage;
  */
 async function addTools(tools_csv, php_version, os_version) {
     let script = '\n' + (await utils.stepLog('Setup Tools', os_version));
+    console.log('tools_csv', tools_csv);
     const tools_list = await getCleanedToolsList(tools_csv);
+    console.log('tools_list', tools_list);
     await utils.asyncForEach(tools_list, async function (release) {
         const tool_data = await parseTool(release);
         const tool = tool_data.name;
@@ -2167,7 +2171,9 @@ async function addTools(tools_csv, php_version, os_version) {
                 script += await addArchive(tool, url, os_version, '"-V"');
                 break;
             case 'composer':
+                console.log(`Version: ${version}`);
                 url = await getComposerUrl(version);
+                console.log(`URL: ${url}`);
                 script += await addArchive('composer', url, os_version, version);
                 break;
             case 'composer-normalize':
